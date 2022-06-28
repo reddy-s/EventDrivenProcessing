@@ -1,0 +1,7 @@
+{
+  "messaging": {
+    "eventBridge": {
+      "eventBridgeObjectLandedChannel": "/Org/TRDataProcessing/ObjectLandedEvent"
+    }
+  }
+}

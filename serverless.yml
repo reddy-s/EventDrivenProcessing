@@ -1,0 +1,131 @@
+service: tr-data-processing
+app: event-driven-orchestrator
+#org: client name?
+
+frameworkVersion: '3'
+configValidationMode: error
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: dev
+  region: us-east-1
+  logRetentionInDays: 7
+
+#  tracing:
+#    lambda: true
+#    apiGateway: true
+#  vpc:
+#    securityGroupIds: ${file(./config/${self:provider.stage}.json):securityGroupIds}
+#    subnetIds: ${file(./config/${self:provider.stage}.json):subnetIds}
+
+package:
+  individually: true
+  excludeDevDependencies: true
+  patterns:
+    - "!test/**"
+    - "!.git/**"
+    - "!.serverless/**"
+    - "!coverage/**"
+    - "!README.md"
+    - "!TODO.md"
+    - "!LICENSE"
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+  eventBridgeObjectLandedChannel: ${file(./config/${self:provider.stage}.json):messaging.eventBridge.eventBridgeObjectLandedChannel}
+
+functions:
+  ObjectLandedEventPublisher:
+    name: TRDataProcessing-ObjectLandedTrigger-${self:provider.stage}
+    role: TRDataAcquisitionFunctionsLambdaRole
+    module: TRDataProcessing
+    handler: object_landed_event_publisher.fun
+    memorySize: 128
+    timeout: 10
+    events:
+      - s3:
+          bucket: tr-event-driven-data-processing-${self:provider.stage}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: ingest/
+            - suffix: .csv
+          existing: true
+          forceDeploy: true
+    environment:
+      EVENT_BRIDGE_OBJECT_LANDED_EVENT_CHANNEL: ${self:custom.eventBridgeObjectLandedChannel}
+    tags:
+      purpose: lambda function which is triggered on every PUT event to notify all down stream systems and services
+
+resources:
+  Resources:
+    TREventDrivenDataProcessingS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: Private
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        BucketName: !Join
+          - '-'
+          - - 'tr-event-driven-data-processing'
+            - ${self:provider.stage}
+        LifecycleConfiguration:
+          Rules:
+            - ExpirationInDays: 90
+              Status: Enabled
+        Tags:
+          - Key: CostCenter
+            Value: PersonalDevelopment
+          - Key: Purpose
+            Value: PoC
+      DeletionPolicy: Retain
+    TRDataAcquisitionFunctionsLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: "sts:AssumeRole"
+        Path: /
+        Policies:
+          - PolicyName: logs
+            PolicyDocument:
+              Statement:
+                Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+          - PolicyName: lambda
+            PolicyDocument:
+              Statement:
+                Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+          - PolicyName: S3
+            PolicyDocument:
+              Statement:
+                Effect: Allow
+                Action:
+                  - "s3:*"
+                Resource:
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref TREventDrivenDataProcessingS3Bucket
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref TREventDrivenDataProcessingS3Bucket
+                      - "/*"
