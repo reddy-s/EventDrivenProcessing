@@ -1,0 +1,40 @@
+{
+  'Records': [
+    {
+      'eventVersion': '2.1',
+      'eventSource': 'aws:s3',
+      'awsRegion': 'us-east-1',
+      'eventTime': '2022-07-01T07:30:11.866Z',
+      'eventName': 'ObjectCreated:Put',
+      'userIdentity': {
+        'principalId': 'AWS:AIDAVMPXIVUUHEH4S643L'
+      },
+      'requestParameters': {
+        'sourceIPAddress': '92.0.43.44'
+      },
+      'responseElements': {
+        'x-amz-request-id': 'YXVE6QB2RCE4JX6E',
+        'x-amz-id-2': 'Wq+rdmT0CFV6wvzRRP0cyjaJWRNtzYcwIyf7+kzlVto0Hae81mz2YwBrkcNp4HfweljmihKYM2VAGBgofWQtS6QFlI6iyr9Y'
+      },
+      's3': {
+        's3SchemaVersion': '1.0',
+        'configurationId': 'TRDataProcessing-ObjectLandedTrigger-dev-8c91677bc37fe3a94609800d045da000',
+        'bucket': {
+          'name': 'tr-event-driven-data-processing-dev',
+          'ownerIdentity': {
+            'principalId': 'ABPM4N79I5YN5'
+          },
+          'arn': 'arn:aws:s3:::tr-event-driven-data-processing-dev'
+        },
+        'object': {
+          'key': 'ingest/data4.csv',
+          'size': 28,
+          'eTag': 'f0881b0a7e70c4d7b3e3ed67436ffa2f',
+          'sequencer': '0062BEA283B65024CB'
+        }
+      }
+    }
+  ]
+}
+
+

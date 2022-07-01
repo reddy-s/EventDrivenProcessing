@@ -85,6 +85,15 @@ resources:
           - Key: Purpose
             Value: PoC
       DeletionPolicy: Retain
+    MLPlatformDataArrivedEventBus:
+      Type: AWS::Events::EventBus
+      Properties:
+        Name: MLPlatformDataArrivedEventBus
+        Tags:
+          - Key: CostCenter
+            Value: PersonalDevelopment
+          - Key: Purpose
+            Value: PoC
     TRDataAcquisitionFunctionsLambdaRole:
       Type: AWS::IAM::Role
       Properties:
@@ -129,3 +138,10 @@ resources:
                     - - 'arn:aws:s3:::'
                       - !Ref TREventDrivenDataProcessingS3Bucket
                       - "/*"
+          - PolicyName: EventBusAccess
+            PolicyDocument:
+              Statement:
+                Effect: Allow
+                Action:
+                  - "events:*"
+                Resource: "*"
