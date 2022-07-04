@@ -20,3 +20,15 @@ from a practical standpoint.
 * [Idempotency]
 * [ACID]
 * [Data lake and Lake house]
+
+## Commands
+
+*To deploy*
+```shell
+sls deploy --stage dev --aws-profile training 
+```
+
+*To Remove / delete*
+```shell
+sls remove --stage dev --aws-profile training 
+```

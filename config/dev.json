@@ -1,7 +1,16 @@
 {
   "messaging": {
     "eventBridge": {
-      "eventBridgeObjectLandedChannel": "/Org/TRDataProcessing/ObjectLandedEvent"
+      "objectLanded": {
+        "source": "/tr/TRDataProcessing/ObjectLandedEvent",
+        "eventBus": "MLPlatformEventBus",
+        "detailType": "ObjectLandedEvent"
+      },
+      "dagTriggered": {
+        "source": "/tr/TRDataProcessing/DagTriggeredEvent",
+        "eventBus": "MLPlatformEventBus",
+        "detailType": "DagTriggeredEvent"
+      }
     }
   }
 }
